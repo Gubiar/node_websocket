@@ -1,15 +1,66 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mongodb"
-    url      = "mongodb+srv://ofc2:3yX8DAAcmLxZVJVK@ofc2.awvr1qr.mongodb.net/ofc2?retryWrites=true&w=majority"
+  provider          = "postgresql"
+  url               = env("POSTGRES_PRISMA_URL")
+  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model User {
-    id       String @id @default(auto()) @map("_id") @db.ObjectId
-    name     String
-    email    String @unique
-    password String
+model Usuario {
+  id        Int     @id @default(autoincrement())
+  username  String  @unique
+  nome      String
+  role      Role    @default(GERENTE)
+  senha     String
+  unidadeId Int
+  unidade   Unidade @relation(fields: [unidadeId], references: [id])
+}
+
+model IOT {
+  id      Int      @id @default(autoincrement())
+  nome    String
+  uuid    String   @unique
+  ip      String
+  status  status   @default(Manutencao)
+  maquina Maquina?
+}
+
+model Maquina {
+  id      Int    @id @default(autoincrement())
+  nome    String
+  status  status @default(Manutencao)
+  iotUUID String @unique
+  linhaId Int
+  iot     IOT    @relation(fields: [iotUUID], references: [uuid])
+  linha   Linha  @relation(fields: [linhaId], references: [id])
+}
+
+model Linha {
+  id        Int       @id @default(autoincrement())
+  status    status    @default(Manutencao)
+  nome      String
+  unidadeId Int
+  unidade   Unidade   @relation(fields: [unidadeId], references: [id])
+  maquinas  Maquina[]
+}
+
+model Unidade {
+  id       Int       @id @default(autoincrement())
+  nome     String
+  endereco String
+  linhas   Linha[]
+  usuarios Usuario[]
+}
+
+enum status {
+  Ativo
+  Manutencao
+  Atencao
+}
+
+enum Role {
+  GERENTE
+  ADMIN
 }

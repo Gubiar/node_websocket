@@ -9,6 +9,7 @@ const app = express();
 const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
+
 const server = app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}`)
 );
@@ -128,9 +129,9 @@ app.post("/auth/register", async (req, res) => {
     });
 
   //Check if user exists
-  const userExists = await prisma.User.findUnique({
+  const userExists = await prisma.usuario.findUnique({
     where: {
-      email: email,
+      username: email,
     },
   });
 
@@ -143,11 +144,11 @@ app.post("/auth/register", async (req, res) => {
   //create user
 
   try {
-    const user = await prisma.User.create({
+    const user = await prisma.usuario.create({
       data: {
         name: name,
-        email: email,
-        password: password,
+        username: email,
+        senha: password,
       },
     });
 
@@ -193,9 +194,11 @@ app.post("/auth/login", async (req, res) => {
         .json({ success: "false", message: "Email ou senha inválidos." });
 
     //Check if user exists
-    const user = await prisma.User.findUnique({
+    
+
+    const user = await prisma.usuario.findUnique({
       where: {
-        email: email,
+        username: email,
       },
     });
 
